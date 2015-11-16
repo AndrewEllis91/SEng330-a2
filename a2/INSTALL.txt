@@ -1,0 +1,10 @@
+Assignment 2
+Andrew Ellis
+V00722404
+
+Install Info:
+* This program was developed using the NetBeans IDE version 8.0.2
+* The program used the C++ compiler provided by Cygwin and was tested to run
+  on Windows 10.
+* The program can be compiled as is using g++ as a compiler and does not have any
+  external dependencies.
