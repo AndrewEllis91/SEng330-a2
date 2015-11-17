@@ -10,20 +10,9 @@
 #include <vector>
 #include <typeinfo>
 #include <fstream>
+#include "main.h"
 
 using namespace std;
-
-string filename = "config.txt";
-
-/**
- * Base class for the creating the different ships
- */
-class ship{
-public:
-    virtual ship* clone() = 0;
-    virtual void type() = 0;
-    virtual string name() = 0;
-};
 
 /**
  * The carrier class that is cloned when requested by the user
@@ -90,16 +79,6 @@ public:
     string name(){return "patrol";}
 };
 
-/**
- * The ship prototype factory that handles making new ships and stores an
- * array of the prototypes.
- */
-class ShipPrototype{
-public:
-    static ship* makeShip(string choice);
-private:
-    static ship* shipPrototypes[6];
-};
 
 /**
  * The method for creating ships that calls the clone function.
@@ -132,13 +111,14 @@ ship* ShipPrototype::shipPrototypes[] = {
  *  This method works by getting the name of each ship from the vector
  *  and writting them to the file to be read and recreated later.
  */
-void serialize(vector<ship*> ships){
+int serialize(vector<ship*> ships, const char* filename){
     ofstream file;
-    file.open("config.txt");
+    file.open(filename);
     for(int i = 0; i < ships.size(); i++){
         file << ships[i]->name() << endl;
     }
     file.close();
+    return 1;
 }
 
 /**
@@ -146,9 +126,9 @@ void serialize(vector<ship*> ships){
  *  Recreates the vector of selected ships by reading the ship names from the
  *  file and calling the clone function. 
  */
-vector<ship*> deserialize(){
+vector<ship*> deserialize(const char* filename){
     vector<ship*> ships;
-    ifstream file("config.txt");
+    ifstream file(filename);
     string line;
     while(getline(file, line)){
         ships.push_back(ShipPrototype::makeShip(line));
@@ -159,25 +139,30 @@ vector<ship*> deserialize(){
 /**
  *  Method for printing the selected ships to the console.
  */
-void printShips(vector<ship*> ships){
+vector<string> printShips(vector<ship*> ships){
+    vector<string> names;
     cout << "The Selected Ships Are:\n";
     for(int i = 0; i < ships.size(); i++){
         cout << "Ship" << i + 1 << ": ";
         ships[i]->type();
+        names.push_back(ships[i]->name());
     }
+    return names;
 }
 
 /**
  *  Program Entry Point
  */
 int main(int argc, char** argv) {
-    //TODO: Serialize last configuration and attempt to load a previous config
     string choice;
+    const char* filename = "config.txt";
     vector<ship*> ships;
+    
+    // Checks if the user wants to use a saved configuration
     cout << "Do you want to use a pervious configuration? (y/n)\n";
     cin >> choice;
     if(choice.compare("y") == 0){
-        ships = deserialize();
+        ships = deserialize(filename);
         printShips(ships);
         return 0;
     }else if(choice.compare("n") == 0){
@@ -194,9 +179,10 @@ int main(int argc, char** argv) {
         if(choice.compare("q") == 0){break;}
         ships.push_back(ShipPrototype::makeShip(choice));
     }
+    // Prints the selected configuration
     printShips(ships);
     //Serialize the vector of ships
-    serialize(ships);
+    serialize(ships, filename);
     
     return 0;
 }
